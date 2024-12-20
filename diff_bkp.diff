@@ -88,10 +88,10 @@ index 8f7beba..e94e02b 100644
  
  #endif
 diff --git a/config.h b/config.h
-index 68669ac..b1154b2 100644
+index 68669ac..a710a0e 100644
 --- a/config.h
 +++ b/config.h
-@@ -1,24 +1,25 @@
+@@ -1,24 +1,24 @@
  /* See LICENSE file for copyright and license details. */
  /* Default settings; can be overriden by command line. */
  
@@ -119,17 +119,16 @@ index 68669ac..b1154b2 100644
 -    /* [SchemeSel] = { "#ebdbb2", "#98971a" }, */
 +	/*     fg         bg       */
 +	[SchemeNorm] = { "#ebdbb2", "#282828" },
-+	//[SchemeSel] = { "#ebdbb2", "#98971a" },
      [SchemeSel] = { "#ebdbb2", "#458588" },
 -    [SchemeOut] = { "#ebdbb2", "#8ec07c" },
-+	[SchemeSelHighlight] = { "#ffc978", "#005577" },
-+	[SchemeNormHighlight] = { "#ffc978", "#222222" },
++    [SchemeSelHighlight] = { "#d79921", "#458588" },
++    [SchemeNormHighlight] = { "#d79921", "#282828" },
 +	[SchemeOut] = { "#ebdbb2", "#8ec07c" },
-+	[SchemeOutHighlight] = { "#ffc978", "#00ffff" },
++    [SchemeOutHighlight] = { "#83a598", "#458588" },
  };
  
  /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
-@@ -29,3 +30,6 @@ static unsigned int lines      = 0;
+@@ -29,3 +29,6 @@ static unsigned int lines      = 0;
   * for example: " /?\"&[]"
   */
  static const char worddelimiters[] = " ";
