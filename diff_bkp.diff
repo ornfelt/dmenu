@@ -137,13 +137,13 @@ index 68669ac..181f342 100644
 +/* Size of the window border */
 +static unsigned int border_width = 0;
 diff --git a/config.mk b/config.mk
-index 566348b..137f7c8 100644
+index 566348b..dcc5bb3 100644
 --- a/config.mk
 +++ b/config.mk
 @@ -1,5 +1,5 @@
  # dmenu version
 -VERSION = 5.2
-+VERSION = 5.3
++VERSION = 5.4
  
  # paths
  PREFIX = /usr/local
