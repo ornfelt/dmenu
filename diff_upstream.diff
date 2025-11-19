@@ -155,7 +155,7 @@ index 323f93c..c036baa 100644
  dmenu grabs the keyboard before reading stdin if not reading from a tty. This
  is faster, but will lock up X until stdin reaches end\-of\-file.
 diff --git a/dmenu.c b/dmenu.c
-index 9577b37..ad79e90 100644
+index 9577b37..a3a2a5a 100644
 --- a/dmenu.c
 +++ b/dmenu.c
 @@ -25,8 +25,7 @@
@@ -168,7 +168,7 @@ index 9577b37..ad79e90 100644
  struct item {
  	char *text;
  	struct item *left, *right;
-@@ -95,14 +94,26 @@ calcoffsets(void)
+@@ -95,13 +94,23 @@ calcoffsets(void)
  			break;
  }
  
@@ -190,14 +190,11 @@ index 9577b37..ad79e90 100644
 -	XUngrabKeyboard(dpy, CurrentTime);
 -	for (i = 0; i < SchemeLast; i++)
 +    XUngrabKeyboard(dpy, CurrentTime);
-+	for (i = 0; i < SchemeLast; i++) {
++    for (i = 0; i < SchemeLast; i++)
  		drw_scm_free(drw, scheme[i], 2);
-+		free(scheme[i]);
-+    }
  	for (i = 0; items && items[i].text; ++i)
  		free(items[i].text);
- 	free(items);
-@@ -129,6 +140,43 @@ cistrstr(const char *h, const char *n)
+@@ -129,6 +138,43 @@ cistrstr(const char *h, const char *n)
  	return NULL;
  }
  
@@ -241,7 +238,7 @@ index 9577b37..ad79e90 100644
  static int
  drawitem(struct item *item, int x, int y, int w)
  {
-@@ -139,7 +187,9 @@ drawitem(struct item *item, int x, int y, int w)
+@@ -139,7 +185,9 @@ drawitem(struct item *item, int x, int y, int w)
  	else
  		drw_setscheme(drw, scheme[SchemeNorm]);
  
@@ -252,7 +249,7 @@ index 9577b37..ad79e90 100644
  }
  
  static void
-@@ -636,6 +686,7 @@ setup(void)
+@@ -636,6 +684,7 @@ setup(void)
  	bh = drw->fonts->h + 2;
  	lines = MAX(lines, 0);
  	mh = (lines + 1) * bh;
@@ -260,7 +257,7 @@ index 9577b37..ad79e90 100644
  #ifdef XINERAMA
  	i = 0;
  	if (parentwin == root && (info = XineramaQueryScreens(dpy, &n))) {
-@@ -662,9 +713,17 @@ setup(void)
+@@ -662,9 +711,17 @@ setup(void)
  				if (INTERSECT(x, y, 1, 1, info[i]) != 0)
  					break;
  
@@ -281,7 +278,7 @@ index 9577b37..ad79e90 100644
  		XFree(info);
  	} else
  #endif
-@@ -672,9 +731,16 @@ setup(void)
+@@ -672,9 +729,16 @@ setup(void)
  		if (!XGetWindowAttributes(dpy, parentwin, &wa))
  			die("could not get embedding window attributes: 0x%lx",
  			    parentwin);
@@ -301,7 +298,7 @@ index 9577b37..ad79e90 100644
  	}
  	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
  	inputw = mw / 3; /* input width: ~33% of monitor width */
-@@ -684,9 +750,11 @@ setup(void)
+@@ -684,9 +748,11 @@ setup(void)
  	swa.override_redirect = True;
  	swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
  	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask;
@@ -314,7 +311,7 @@ index 9577b37..ad79e90 100644
  	XSetClassHint(dpy, win, &ch);
  
  	/* input methods */
-@@ -733,6 +801,8 @@ main(int argc, char *argv[])
+@@ -733,6 +799,8 @@ main(int argc, char *argv[])
  			topbar = 0;
  		else if (!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
  			fast = 1;
@@ -323,7 +320,7 @@ index 9577b37..ad79e90 100644
  		else if (!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
  			fstrncmp = strncasecmp;
  			fstrstr = cistrstr;
-@@ -757,6 +827,8 @@ main(int argc, char *argv[])
+@@ -757,6 +825,8 @@ main(int argc, char *argv[])
  			colors[SchemeSel][ColFg] = argv[++i];
  		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
  			embed = argv[++i];
@@ -333,7 +330,7 @@ index 9577b37..ad79e90 100644
  			usage();
  
 diff --git a/drw.c b/drw.c
-index 9fdd1a4..71cda2c 100644
+index 9fdd1a4..473aaa0 100644
 --- a/drw.c
 +++ b/drw.c
 @@ -186,7 +186,7 @@ drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount)
@@ -345,11 +342,12 @@ index 9fdd1a4..71cda2c 100644
  		return NULL;
  
  	for (i = 0; i < clrcount; i++)
-@@ -215,7 +215,6 @@ drw_scm_free(Drw *drw, Clr *scm, size_t clrcount)
+@@ -215,7 +215,7 @@ drw_scm_free(Drw *drw, Clr *scm, size_t clrcount)
  
  	for (i = 0; i < clrcount; i++)
  		drw_clr_free(drw, &scm[i]);
 -	free(scm);
++    free(scm);
  }
  
  void
