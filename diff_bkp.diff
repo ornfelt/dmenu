@@ -162,7 +162,7 @@ index 323f93c..c036baa 100644
  dmenu grabs the keyboard before reading stdin if not reading from a tty. This
  is faster, but will lock up X until stdin reaches end\-of\-file.
 diff --git a/dmenu.c b/dmenu.c
-index 1bbc3ac..8e381ec 100644
+index 1bbc3ac..d085daa 100644
 --- a/dmenu.c
 +++ b/dmenu.c
 @@ -21,16 +21,15 @@
@@ -279,7 +279,7 @@ index 1bbc3ac..8e381ec 100644
 -    XCloseDisplay(dpy);
 +	size_t i;
 +
-+	XUngrabKey(dpy, AnyKey, AnyModifier, root);
++    XUngrabKeyboard(dpy, CurrentTime);
 +	for (i = 0; i < SchemeLast; i++)
 +		free(scheme[i]);
 +	for (i = 0; items && items[i].text; ++i)

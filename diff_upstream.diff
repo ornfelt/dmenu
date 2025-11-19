@@ -140,6 +140,17 @@ index 0000000..181f342
 +
 +/* Size of the window border */
 +static unsigned int border_width = 0;
+diff --git a/config.mk b/config.mk
+index dcc5bb3..137f7c8 100644
+--- a/config.mk
++++ b/config.mk
+@@ -1,5 +1,5 @@
+ # dmenu version
+-VERSION = 5.4
++VERSION = 5.3
+ 
+ # paths
+ PREFIX = /usr/local
 diff --git a/dmenu.1 b/dmenu.1
 index 323f93c..c036baa 100644
 --- a/dmenu.1
@@ -155,7 +166,7 @@ index 323f93c..c036baa 100644
  dmenu grabs the keyboard before reading stdin if not reading from a tty. This
  is faster, but will lock up X until stdin reaches end\-of\-file.
 diff --git a/dmenu.c b/dmenu.c
-index 804da64..8e381ec 100644
+index 9577b37..d085daa 100644
 --- a/dmenu.c
 +++ b/dmenu.c
 @@ -25,8 +25,7 @@
@@ -168,7 +179,7 @@ index 804da64..8e381ec 100644
  struct item {
  	char *text;
  	struct item *left, *right;
-@@ -95,6 +94,16 @@ calcoffsets(void)
+@@ -95,14 +94,24 @@ calcoffsets(void)
  			break;
  }
  
@@ -185,6 +196,16 @@ index 804da64..8e381ec 100644
  static void
  cleanup(void)
  {
+ 	size_t i;
+ 
+-	XUngrabKeyboard(dpy, CurrentTime);
++    XUngrabKeyboard(dpy, CurrentTime);
+ 	for (i = 0; i < SchemeLast; i++)
+-		drw_scm_free(drw, scheme[i], 2);
++		free(scheme[i]);
+ 	for (i = 0; items && items[i].text; ++i)
+ 		free(items[i].text);
+ 	free(items);
 @@ -129,6 +138,43 @@ cistrstr(const char *h, const char *n)
  	return NULL;
  }
@@ -320,6 +341,74 @@ index 804da64..8e381ec 100644
  		else
  			usage();
  
+diff --git a/drw.c b/drw.c
+index 9fdd1a4..c41e6af 100644
+--- a/drw.c
++++ b/drw.c
+@@ -178,7 +178,8 @@ drw_clr_create(Drw *drw, Clr *dest, const char *clrname)
+ 		die("error, cannot allocate color '%s'", clrname);
+ }
+ 
+-/* Create color schemes. */
++/* Wrapper to create color schemes. The caller has to call free(3) on the
++ * returned color scheme when done using it. */
+ Clr *
+ drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount)
+ {
+@@ -186,7 +187,7 @@ drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount)
+ 	Clr *ret;
+ 
+ 	/* need at least two colors for a scheme */
+-	if (!drw || !clrnames || clrcount < 2 || !(ret = ecalloc(clrcount, sizeof(Clr))))
++	if (!drw || !clrnames || clrcount < 2 || !(ret = ecalloc(clrcount, sizeof(XftColor))))
+ 		return NULL;
+ 
+ 	for (i = 0; i < clrcount; i++)
+@@ -194,30 +195,6 @@ drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount)
+ 	return ret;
+ }
+ 
+-void
+-drw_clr_free(Drw *drw, Clr *c)
+-{
+-	if (!drw || !c)
+-		return;
+-
+-	/* c is typedef XftColor Clr */
+-	XftColorFree(drw->dpy, DefaultVisual(drw->dpy, drw->screen),
+-	             DefaultColormap(drw->dpy, drw->screen), c);
+-}
+-
+-void
+-drw_scm_free(Drw *drw, Clr *scm, size_t clrcount)
+-{
+-	size_t i;
+-
+-	if (!drw || !scm)
+-		return;
+-
+-	for (i = 0; i < clrcount; i++)
+-		drw_clr_free(drw, &scm[i]);
+-	free(scm);
+-}
+-
+ void
+ drw_setfontset(Drw *drw, Fnt *set)
+ {
+diff --git a/drw.h b/drw.h
+index 2ed77be..fd7631b 100644
+--- a/drw.h
++++ b/drw.h
+@@ -40,9 +40,7 @@ void drw_font_getexts(Fnt *font, const char *text, unsigned int len, unsigned in
+ 
+ /* Colorscheme abstraction */
+ void drw_clr_create(Drw *drw, Clr *dest, const char *clrname);
+-void drw_clr_free(Drw *drw, Clr *c);
+ Clr *drw_scm_create(Drw *drw, const char *clrnames[], size_t clrcount);
+-void drw_scm_free(Drw *drw, Clr *scm, size_t clrcount);
+ 
+ /* Cursor abstraction */
+ Cur *drw_cur_create(Drw *drw, int shape);
 diff --git a/patches/get.sh b/patches/get.sh
 new file mode 100755
 index 0000000..0915b19
