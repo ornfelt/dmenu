@@ -272,7 +272,7 @@ index ed0e442..8463af2 100644
  dmenu grabs the keyboard before reading stdin if not reading from a tty. This
  is faster, but will lock up X until stdin reaches end\-of\-file.
 diff --git a/dmenu.c b/dmenu.c
-index 363d19f..736f81a 100644
+index 64ff973..abfd550 100644
 --- a/dmenu.c
 +++ b/dmenu.c
 @@ -25,8 +25,7 @@

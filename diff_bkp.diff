@@ -303,7 +303,7 @@ index 323f93c..8463af2 100644
  prints version information to stdout, then exits.
  .TP
 diff --git a/dmenu.c b/dmenu.c
-index 1bbc3ac..736f81a 100644
+index 1bbc3ac..abfd550 100644
 --- a/dmenu.c
 +++ b/dmenu.c
 @@ -21,16 +21,15 @@
@@ -593,7 +593,7 @@ index 1bbc3ac..736f81a 100644
 +		/* draw vertical list */
 +		for (item = curr; item != next; item = item->right)
 +			drawitem(item, x, y += bh, mw - x);
-+	} else if (matches) {
++	} else if (matches && curr) {
 +		/* draw horizontal list */
 +		x += inputw;
 +		w = TEXTW("<");
