@@ -258,21 +258,10 @@ index 0000000..181f342
 +/* Size of the window border */
 +static unsigned int border_width = 0;
 diff --git a/dmenu.1 b/dmenu.1
-index ed0e442..c036baa 100644
+index ed0e442..8463af2 100644
 --- a/dmenu.1
 +++ b/dmenu.1
-@@ -20,10 +20,6 @@ dmenu \- dynamic menu
- .IR color ]
- .RB [ \-sf
- .IR color ]
--.RB [ \-ob
--.IR color ]
--.RB [ \-of
--.IR color ]
- .RB [ \-w
- .IR windowid ]
- .P
-@@ -44,6 +40,9 @@ which lists programs in the user's $PATH and runs the result in their $SHELL.
+@@ -44,6 +44,9 @@ which lists programs in the user's $PATH and runs the result in their $SHELL.
  .B \-b
  dmenu appears at the bottom of the screen.
  .TP
@@ -282,21 +271,8 @@ index ed0e442..c036baa 100644
  .B \-f
  dmenu grabs the keyboard before reading stdin if not reading from a tty. This
  is faster, but will lock up X until stdin reaches end\-of\-file.
-@@ -79,12 +78,6 @@ defines the selected background color.
- .BI \-sf " color"
- defines the selected foreground color.
- .TP
--.BI \-ob " color"
--defines the outline background color (for multiple selection).
--.TP
--.BI \-of " color"
--defines the outline foreground color (for multiple selection).
--.TP
- .B \-v
- prints version information to stdout, then exits.
- .TP
 diff --git a/dmenu.c b/dmenu.c
-index c2425e2..a3a2a5a 100644
+index 363d19f..736f81a 100644
 --- a/dmenu.c
 +++ b/dmenu.c
 @@ -25,8 +25,7 @@
@@ -390,25 +366,7 @@ index c2425e2..a3a2a5a 100644
  }
  
  static void
-@@ -171,7 +219,7 @@ drawmenu(void)
- 		/* draw vertical list */
- 		for (item = curr; item != next; item = item->right)
- 			drawitem(item, x, y += bh, mw - x);
--	} else if (matches && curr) {
-+	} else if (matches) {
- 		/* draw horizontal list */
- 		x += inputw;
- 		w = TEXTW("<");
-@@ -414,7 +462,7 @@ keypress(XKeyEvent *ev)
- 	switch(ksym) {
- 	default:
- insert:
--		if (len > 0 && !iscntrl((unsigned char)*buf))
-+		if (!iscntrl((unsigned char)*buf))
- 			insert(buf, len);
- 		break;
- 	case XK_Delete:
-@@ -636,11 +684,10 @@ setup(void)
+@@ -636,6 +684,7 @@ setup(void)
  	bh = drw->fonts->h + 2;
  	lines = MAX(lines, 0);
  	mh = (lines + 1) * bh;
@@ -416,18 +374,9 @@ index c2425e2..a3a2a5a 100644
  #ifdef XINERAMA
  	i = 0;
  	if (parentwin == root && (info = XineramaQueryScreens(dpy, &n))) {
--		if (n < 1)
--			die("Xinerama reported no screens");
- 		XGetInputFocus(dpy, &w, &di);
- 		if (mon >= 0 && mon < n)
- 			i = mon;
-@@ -663,13 +710,18 @@ setup(void)
- 			for (i = 0; i < n; i++)
+@@ -662,9 +711,17 @@ setup(void)
  				if (INTERSECT(x, y, 1, 1, info[i]) != 0)
  					break;
--		/* fallback to the first screen if there is no intersection */
--		if (i >= n)
--			i = 0;
  
 -		x = info[i].x_org;
 -		y = info[i].y_org + (topbar ? 0 : info[i].height - mh);
@@ -446,7 +395,7 @@ index c2425e2..a3a2a5a 100644
  		XFree(info);
  	} else
  #endif
-@@ -677,9 +729,16 @@ setup(void)
+@@ -672,9 +729,16 @@ setup(void)
  		if (!XGetWindowAttributes(dpy, parentwin, &wa))
  			die("could not get embedding window attributes: 0x%lx",
  			    parentwin);
@@ -466,7 +415,7 @@ index c2425e2..a3a2a5a 100644
  	}
  	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
  	inputw = mw / 3; /* input width: ~33% of monitor width */
-@@ -689,9 +748,11 @@ setup(void)
+@@ -684,9 +748,11 @@ setup(void)
  	swa.override_redirect = True;
  	swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
  	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask;
@@ -479,7 +428,7 @@ index c2425e2..a3a2a5a 100644
  	XSetClassHint(dpy, win, &ch);
  
  	/* input methods */
-@@ -738,6 +799,8 @@ main(int argc, char *argv[])
+@@ -733,6 +799,8 @@ main(int argc, char *argv[])
  			topbar = 0;
  		else if (!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
  			fast = 1;
@@ -488,14 +437,8 @@ index c2425e2..a3a2a5a 100644
  		else if (!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
  			fstrncmp = strncasecmp;
  			fstrstr = cistrstr;
-@@ -760,12 +823,10 @@ main(int argc, char *argv[])
- 			colors[SchemeSel][ColBg] = argv[++i];
- 		else if (!strcmp(argv[i], "-sf"))  /* selected foreground color */
- 			colors[SchemeSel][ColFg] = argv[++i];
--		else if (!strcmp(argv[i], "-ob"))  /* outline background color */
--			colors[SchemeOut][ColBg] = argv[++i];
--		else if (!strcmp(argv[i], "-of"))  /* outline foreground color */
--			colors[SchemeOut][ColFg] = argv[++i];
+@@ -761,6 +829,8 @@ main(int argc, char *argv[])
+ 			colors[SchemeOut][ColFg] = argv[++i];
  		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
  			embed = argv[++i];
 +		else if (!strcmp(argv[i], "-bw"))
