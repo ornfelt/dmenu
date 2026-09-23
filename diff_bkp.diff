@@ -303,7 +303,7 @@ index 323f93c..8463af2 100644
  prints version information to stdout, then exits.
  .TP
 diff --git a/dmenu.c b/dmenu.c
-index 1bbc3ac..abfd550 100644
+index 1bbc3ac..ec7b12b 100644
 --- a/dmenu.c
 +++ b/dmenu.c
 @@ -21,16 +21,15 @@
@@ -328,7 +328,7 @@ index 1bbc3ac..abfd550 100644
  };
  
  static char text[BUFSIZ] = "";
-@@ -60,768 +59,811 @@ static char *(*fstrstr)(const char *, const char *) = strstr;
+@@ -60,768 +59,816 @@ static char *(*fstrstr)(const char *, const char *) = strstr;
  static unsigned int
  textw_clamp(const char *str, unsigned int n)
  {
@@ -1487,6 +1487,8 @@ index 1bbc3ac..abfd550 100644
 -    } else
 +	i = 0;
 +	if (parentwin == root && (info = XineramaQueryScreens(dpy, &n))) {
++		if (n < 1)
++			die("Xinerama reported no screens");
 +		XGetInputFocus(dpy, &w, &di);
 +		if (mon >= 0 && mon < n)
 +			i = mon;
@@ -1509,6 +1511,9 @@ index 1bbc3ac..abfd550 100644
 +			for (i = 0; i < n; i++)
 +				if (INTERSECT(x, y, 1, 1, info[i]) != 0)
 +					break;
++		/* fallback to the first screen if there is no intersection */
++		if (i >= n)
++			i = 0;
 +
 +		if (centered) {
 +			mw = MIN(MAX(max_textw() + promptw, min_width), info[i].width);
