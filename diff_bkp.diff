@@ -303,7 +303,7 @@ index 323f93c..8463af2 100644
  prints version information to stdout, then exits.
  .TP
 diff --git a/dmenu.c b/dmenu.c
-index 1bbc3ac..ec7b12b 100644
+index 1bbc3ac..2be59d5 100644
 --- a/dmenu.c
 +++ b/dmenu.c
 @@ -21,16 +21,15 @@
@@ -1132,7 +1132,7 @@ index 1bbc3ac..ec7b12b 100644
 -            match();
 -            break;
 -    }
-+		if (!iscntrl((unsigned char)*buf))
++		if (len > 0 && !iscntrl((unsigned char)*buf))
 +			insert(buf, len);
 +		break;
 +	case XK_Delete:
