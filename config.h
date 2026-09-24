@@ -16,11 +16,11 @@ static const char *colors[SchemeLast][2] = {
 	/*     fg         bg       */
 	/* the bg of the *Highlight schemes is taken from their base scheme */
 	[SchemeNorm] = { "#ebdbb2", "#282828" },
-    [SchemeSel] = { "#ebdbb2", "#458588" },
-    [SchemeSelHighlight] = { "#d79921", "#458588" },
+    [SchemeSel] = { "#fbf1c7", "#458588" },
+    [SchemeSelHighlight] = { "#fabd2f", "#458588" },
     [SchemeNormHighlight] = { "#d79921", "#282828" },
-	[SchemeOut] = { "#ebdbb2", "#8ec07c" },
-    [SchemeOutHighlight] = { "#83a598", "#8ec07c" },
+	[SchemeOut] = { "#282828", "#8ec07c" },
+    [SchemeOutHighlight] = { "#9d0006", "#8ec07c" },
 };
 
 /* -l option; if nonzero, dmenu uses vertical list with given number of lines */

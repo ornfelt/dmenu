@@ -18,8 +18,8 @@ static const char *colors[SchemeLast][2] = {
 	[SchemeSel] = { "#ebdbb2", "#98971a" },
 	[SchemeSelHighlight] = { "#ffc978", "#98971a" },
 	[SchemeNormHighlight] = { "#ffc978", "#282828" },
-	[SchemeOut] = { "#ebdbb2", "#8ec07c" },
-	[SchemeOutHighlight] = { "#ffc978", "#8ec07c" },
+	[SchemeOut] = { "#282828", "#8ec07c" },
+	[SchemeOutHighlight] = { "#9d0006", "#8ec07c" },
 };
 /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
 static unsigned int lines      = 0;
