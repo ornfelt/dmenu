@@ -674,6 +674,10 @@ setup(void)
 	int a, di, n, area = 0;
 #endif
 	/* init appearance */
+	/* highlight schemes use the background of their base scheme, so -nb/-sb/-ob apply */
+	colors[SchemeNormHighlight][ColBg] = colors[SchemeNorm][ColBg];
+	colors[SchemeSelHighlight][ColBg] = colors[SchemeSel][ColBg];
+	colors[SchemeOutHighlight][ColBg] = colors[SchemeOut][ColBg];
 	for (j = 0; j < SchemeLast; j++)
 		scheme[j] = drw_scm_create(drw, colors[j], 2);
 
