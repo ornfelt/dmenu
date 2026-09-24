@@ -26,6 +26,7 @@
 
 /* enums */
 enum { SchemeNorm, SchemeSel, SchemeOut, SchemeNormHighlight, SchemeSelHighlight, SchemeOutHighlight, SchemeLast }; /* color schemes */
+
 struct item {
 	char *text;
 	struct item *left, *right;
@@ -108,8 +109,8 @@ cleanup(void)
 {
 	size_t i;
 
-    XUngrabKeyboard(dpy, CurrentTime);
-    for (i = 0; i < SchemeLast; i++)
+	XUngrabKeyboard(dpy, CurrentTime);
+	for (i = 0; i < SchemeLast; i++)
 		drw_scm_free(drw, scheme[i], 2);
 	for (i = 0; items && items[i].text; ++i)
 		free(items[i].text);
@@ -722,7 +723,6 @@ setup(void)
 
 		if (centered) {
 			mw = MIN(MAX(max_textw() + promptw, min_width), info[i].width - bw2);
-            //mw = 900;
 			x = info[i].x_org + ((info[i].width  - mw - bw2) / 2);
 			y = info[i].y_org + ((info[i].height - mh - bw2) / menu_height_ratio);
 		} else {
