@@ -142,7 +142,12 @@ static void
 drawhighlights(struct item *item, int x, int y, int maxw)
 {
 	char restorechar, tokens[sizeof text], *highlight,  *token;
-	int indentx, highlightlen;
+	int indentx, highlightlen, highlightw, textw, ellipsisw, truncated;
+
+	/* width for the item text, and whether drw_text() cuts it with an ellipsis */
+	textw = maxw - lrpad / 2;
+	ellipsisw = TEXTW("...") - lrpad;
+	truncated = (int)TEXTW(item->text) - lrpad > textw;
 
 	drw_setscheme(drw, scheme[item == sel ? SchemeSelHighlight : item->out ? SchemeOutHighlight : SchemeNormHighlight]);
 	strcpy(tokens, text);
@@ -153,21 +158,28 @@ drawhighlights(struct item *item, int x, int y, int maxw)
 			highlightlen = highlight - item->text;
 			restorechar = *highlight;
 			item->text[highlightlen] = '\0';
-			indentx = TEXTW(item->text);
+			indentx = TEXTW(item->text) - lrpad;
 			item->text[highlightlen] = restorechar;
 
-			// Move highlight str end, draw highlight, & restore
+			// Hidden under the ellipsis, and so is every later match
+			if (truncated && indentx + ellipsisw > textw) break;
+
+			// Move highlight str end, calc width & restore
 			restorechar = highlight[strlen(token)];
 			highlight[strlen(token)] = '\0';
-			if (indentx < maxw)
-				drw_text(
-					drw,
-					x + indentx - (lrpad / 2),
-					y,
-					MIN(maxw - indentx, TEXTW(highlight) - lrpad),
-					bh, 0, highlight, 0
-				);
+			highlightw = TEXTW(highlight) - lrpad;
 			highlight[strlen(token)] = restorechar;
+
+			if (truncated && indentx + highlightw > textw - ellipsisw) {
+				// Runs into the ellipsis: draw the rest of the item text with the
+				// same right edge, so it gets cut exactly like in drawitem()
+				drw_text(drw, x + lrpad / 2 + indentx, y, textw - indentx, bh, 0, highlight, 0);
+			} else {
+				// Move highlight str end, draw highlight, & restore
+				highlight[strlen(token)] = '\0';
+				drw_text(drw, x + lrpad / 2 + indentx, y, highlightw, bh, 0, highlight, 0);
+				highlight[strlen(token)] = restorechar;
+			}
 
 			if (strlen(highlight) - strlen(token) < strlen(token)) break;
 			highlight = fstrstr(highlight + strlen(token), token);
