@@ -234,7 +234,7 @@ index 1edb647..eeaddc3 100644
 +static unsigned int border_width = 0;
 diff --git a/config.h b/config.h
 new file mode 100644
-index 0000000..69da681
+index 0000000..5cba672
 --- /dev/null
 +++ b/config.h
 @@ -0,0 +1,36 @@
@@ -248,18 +248,18 @@ index 0000000..69da681
 +static const float menu_height_ratio = 4.0f;  /* This is the ratio used in the original calculation */
 +/* -fn option overrides fonts[0]; default X11 font or font set */
 +//static const char *fonts[] = {
-+//	"monospace:size=10"
++//  "monospace:size=10"
 +//};
 +static const char *fonts[] = { "JetBrainsMono Nerd Font:size=11:style=bold" };
 +static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
 +static const char *colors[SchemeLast][2] = {
-+	/*     fg         bg       */
-+	/* the bg of the *Highlight schemes is taken from their base scheme */
-+	[SchemeNorm] = { "#ebdbb2", "#282828" },
++    /*     fg         bg       */
++    /* the bg of the *Highlight schemes is taken from their base scheme */
++    [SchemeNorm] = { "#ebdbb2", "#282828" },
 +    [SchemeSel] = { "#fbf1c7", "#458588" },
 +    [SchemeSelHighlight] = { "#fabd2f", "#458588" },
 +    [SchemeNormHighlight] = { "#d79921", "#282828" },
-+	[SchemeOut] = { "#282828", "#8ec07c" },
++    [SchemeOut] = { "#282828", "#8ec07c" },
 +    [SchemeOutHighlight] = { "#9d0006", "#8ec07c" },
 +};
 +
@@ -320,7 +320,7 @@ index ed0e442..798bd32 100644
  embed into windowid.
  .SH USAGE
 diff --git a/dmenu.c b/dmenu.c
-index c2425e2..7990dc7 100644
+index c2425e2..c194598 100644
 --- a/dmenu.c
 +++ b/dmenu.c
 @@ -25,7 +25,7 @@
@@ -532,7 +532,7 @@ index c2425e2..7990dc7 100644
  		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
  			embed = argv[++i];
 +		else if (!strcmp(argv[i], "-bw"))
-+			border_width = atoi(argv[++i]); /* border width */
++			border_width = MAX(atoi(argv[++i]), 0); /* border width */
  		else
  			usage();
  

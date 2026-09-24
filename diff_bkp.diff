@@ -219,7 +219,7 @@ index 8f7beba..e94e02b 100644
  
  #endif
 diff --git a/config.h b/config.h
-index 68669ac..69da681 100644
+index 68669ac..5cba672 100644
 --- a/config.h
 +++ b/config.h
 @@ -1,24 +1,26 @@
@@ -238,7 +238,7 @@ index 68669ac..69da681 100644
  /* -fn option overrides fonts[0]; default X11 font or font set */
 -/* static const char *fonts[] = { "JetBrainsMono Nerd Font:size=11:style=bold:antialias=true:autohint=true", "JoyPixels:pixelsize=13:antialias=true:autohint=true" }; */
 +//static const char *fonts[] = {
-+//	"monospace:size=10"
++//  "monospace:size=10"
 +//};
  static const char *fonts[] = { "JetBrainsMono Nerd Font:size=11:style=bold" };
 -// Original:
@@ -247,17 +247,16 @@ index 68669ac..69da681 100644
  static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
  static const char *colors[SchemeLast][2] = {
 -    /*              fg          bg       */
--    [SchemeNorm] = { "#ebdbb2", "#282828" },
++    /*     fg         bg       */
++    /* the bg of the *Highlight schemes is taken from their base scheme */
+     [SchemeNorm] = { "#ebdbb2", "#282828" },
 -    /* [SchemeSel] = { "#ebdbb2", "#98971a" }, */
 -    [SchemeSel] = { "#ebdbb2", "#458588" },
 -    [SchemeOut] = { "#ebdbb2", "#8ec07c" },
-+	/*     fg         bg       */
-+	/* the bg of the *Highlight schemes is taken from their base scheme */
-+	[SchemeNorm] = { "#ebdbb2", "#282828" },
 +    [SchemeSel] = { "#fbf1c7", "#458588" },
 +    [SchemeSelHighlight] = { "#fabd2f", "#458588" },
 +    [SchemeNormHighlight] = { "#d79921", "#282828" },
-+	[SchemeOut] = { "#282828", "#8ec07c" },
++    [SchemeOut] = { "#282828", "#8ec07c" },
 +    [SchemeOutHighlight] = { "#9d0006", "#8ec07c" },
  };
  
@@ -339,7 +338,7 @@ index 323f93c..798bd32 100644
  embed into windowid.
  .SH USAGE
 diff --git a/dmenu.c b/dmenu.c
-index 1bbc3ac..7990dc7 100644
+index 1bbc3ac..c194598 100644
 --- a/dmenu.c
 +++ b/dmenu.c
 @@ -21,16 +21,16 @@
@@ -1796,7 +1795,7 @@ index 1bbc3ac..7990dc7 100644
 +		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 +			embed = argv[++i];
 +		else if (!strcmp(argv[i], "-bw"))
-+			border_width = atoi(argv[++i]); /* border width */
++			border_width = MAX(atoi(argv[++i]), 0); /* border width */
 +		else
 +			usage();
 +
