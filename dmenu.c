@@ -742,7 +742,7 @@ setup(void)
 		if (centered) {
 			mw = MIN(MAX(max_textw() + promptw, min_width), wa.width - bw2);
 			x = (wa.width  - mw - bw2) / 2;
-			y = (wa.height - mh - bw2) / 2;
+			y = (wa.height - mh - bw2) / menu_height_ratio;
 		} else {
 			x = 0;
 			y = topbar ? 0 : wa.height - mh - bw2;
