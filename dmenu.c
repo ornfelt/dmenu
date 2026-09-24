@@ -162,7 +162,7 @@ drawhighlights(struct item *item, int x, int y, int maxw)
 			if (indentx < maxw)
 				drw_text(
 					drw,
-					x + indentx - (lrpad / 2) - 1,
+					x + indentx - (lrpad / 2),
 					y,
 					MIN(maxw - indentx, TEXTW(highlight) - lrpad),
 					bh, 0, highlight, 0
