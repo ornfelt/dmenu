@@ -219,7 +219,7 @@ index 8f7beba..e94e02b 100644
  
  #endif
 diff --git a/config.h b/config.h
-index 68669ac..5cba672 100644
+index 68669ac..da51dc3 100644
 --- a/config.h
 +++ b/config.h
 @@ -1,24 +1,26 @@
@@ -253,8 +253,8 @@ index 68669ac..5cba672 100644
 -    /* [SchemeSel] = { "#ebdbb2", "#98971a" }, */
 -    [SchemeSel] = { "#ebdbb2", "#458588" },
 -    [SchemeOut] = { "#ebdbb2", "#8ec07c" },
-+    [SchemeSel] = { "#fbf1c7", "#458588" },
-+    [SchemeSelHighlight] = { "#fabd2f", "#458588" },
++    [SchemeSel] = { "#fbf1c7", "#076678" },
++    [SchemeSelHighlight] = { "#fabd2f", "#076678" },
 +    [SchemeNormHighlight] = { "#d79921", "#282828" },
 +    [SchemeOut] = { "#282828", "#8ec07c" },
 +    [SchemeOutHighlight] = { "#9d0006", "#8ec07c" },

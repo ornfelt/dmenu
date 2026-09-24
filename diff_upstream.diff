@@ -234,7 +234,7 @@ index 1edb647..eeaddc3 100644
 +static unsigned int border_width = 0;
 diff --git a/config.h b/config.h
 new file mode 100644
-index 0000000..5cba672
+index 0000000..da51dc3
 --- /dev/null
 +++ b/config.h
 @@ -0,0 +1,36 @@
@@ -256,8 +256,8 @@ index 0000000..5cba672
 +    /*     fg         bg       */
 +    /* the bg of the *Highlight schemes is taken from their base scheme */
 +    [SchemeNorm] = { "#ebdbb2", "#282828" },
-+    [SchemeSel] = { "#fbf1c7", "#458588" },
-+    [SchemeSelHighlight] = { "#fabd2f", "#458588" },
++    [SchemeSel] = { "#fbf1c7", "#076678" },
++    [SchemeSelHighlight] = { "#fabd2f", "#076678" },
 +    [SchemeNormHighlight] = { "#d79921", "#282828" },
 +    [SchemeOut] = { "#282828", "#8ec07c" },
 +    [SchemeOutHighlight] = { "#9d0006", "#8ec07c" },
