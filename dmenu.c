@@ -98,10 +98,9 @@ static int
 max_textw(void)
 {
 	int len = 0;
-	for (struct item *item = items; item && item->text; item++)
-		//len = MAX(TEXTW(item->text), len);
-        len = MIN(MAX(TEXTW(item->text), len), max_width);
-	return len;
+	for (struct item *item = items; item && item->text && len < max_width; item++)
+		len = MAX(TEXTW(item->text), len);
+	return MIN(len, max_width);
 }
 
 static void
