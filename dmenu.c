@@ -660,7 +660,7 @@ run(void)
 static void
 setup(void)
 {
-	int x, y, i, j;
+	int x, y, i, j, bw2;
 	unsigned int du;
 	XSetWindowAttributes swa;
 	XIM xim;
@@ -688,6 +688,7 @@ setup(void)
 	lines = MAX(lines, 0);
 	mh = (lines + 1) * bh;
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
+	bw2 = 2 * border_width; /* the border is drawn outside of mw x mh */
 #ifdef XINERAMA
 	i = 0;
 	if (parentwin == root && (info = XineramaQueryScreens(dpy, &n))) {
@@ -720,14 +721,14 @@ setup(void)
 			i = 0;
 
 		if (centered) {
-			mw = MIN(MAX(max_textw() + promptw, min_width), info[i].width);
+			mw = MIN(MAX(max_textw() + promptw, min_width), info[i].width - bw2);
             //mw = 900;
-			x = info[i].x_org + ((info[i].width  - mw) / 2);
-			y = info[i].y_org + ((info[i].height - mh) / menu_height_ratio);
+			x = info[i].x_org + ((info[i].width  - mw - bw2) / 2);
+			y = info[i].y_org + ((info[i].height - mh - bw2) / menu_height_ratio);
 		} else {
 			x = info[i].x_org;
-			y = info[i].y_org + (topbar ? 0 : info[i].height - mh);
-			mw = info[i].width;
+			y = info[i].y_org + (topbar ? 0 : info[i].height - mh - bw2);
+			mw = info[i].width - bw2;
 		}
 
 		XFree(info);
@@ -739,13 +740,13 @@ setup(void)
 			    parentwin);
 
 		if (centered) {
-			mw = MIN(MAX(max_textw() + promptw, min_width), wa.width);
-			x = (wa.width  - mw) / 2;
-			y = (wa.height - mh) / 2;
+			mw = MIN(MAX(max_textw() + promptw, min_width), wa.width - bw2);
+			x = (wa.width  - mw - bw2) / 2;
+			y = (wa.height - mh - bw2) / 2;
 		} else {
 			x = 0;
-			y = topbar ? 0 : wa.height - mh;
-			mw = wa.width;
+			y = topbar ? 0 : wa.height - mh - bw2;
+			mw = wa.width - bw2;
 		}
 	}
 	inputw = mw / 3; /* input width: ~33% of monitor width */
