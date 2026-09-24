@@ -194,7 +194,7 @@ index 0000000..fe89bbc
 +stest
 +typescript
 diff --git a/config.def.h b/config.def.h
-index 1edb647..7dfe91a 100644
+index 1edb647..eeaddc3 100644
 --- a/config.def.h
 +++ b/config.def.h
 @@ -2,6 +2,10 @@
@@ -220,8 +220,8 @@ index 1edb647..7dfe91a 100644
 +	[SchemeSel] = { "#ebdbb2", "#98971a" },
 +	[SchemeSelHighlight] = { "#ffc978", "#98971a" },
 +	[SchemeNormHighlight] = { "#ffc978", "#282828" },
-+	[SchemeOut] = { "#ebdbb2", "#8ec07c" },
-+	[SchemeOutHighlight] = { "#ffc978", "#8ec07c" },
++	[SchemeOut] = { "#282828", "#8ec07c" },
++	[SchemeOutHighlight] = { "#9d0006", "#8ec07c" },
  };
  /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
  static unsigned int lines      = 0;
@@ -234,7 +234,7 @@ index 1edb647..7dfe91a 100644
 +static unsigned int border_width = 0;
 diff --git a/config.h b/config.h
 new file mode 100644
-index 0000000..5a5a279
+index 0000000..69da681
 --- /dev/null
 +++ b/config.h
 @@ -0,0 +1,36 @@
@@ -256,11 +256,11 @@ index 0000000..5a5a279
 +	/*     fg         bg       */
 +	/* the bg of the *Highlight schemes is taken from their base scheme */
 +	[SchemeNorm] = { "#ebdbb2", "#282828" },
-+    [SchemeSel] = { "#ebdbb2", "#458588" },
-+    [SchemeSelHighlight] = { "#d79921", "#458588" },
++    [SchemeSel] = { "#fbf1c7", "#458588" },
++    [SchemeSelHighlight] = { "#fabd2f", "#458588" },
 +    [SchemeNormHighlight] = { "#d79921", "#282828" },
-+	[SchemeOut] = { "#ebdbb2", "#8ec07c" },
-+    [SchemeOutHighlight] = { "#83a598", "#8ec07c" },
++	[SchemeOut] = { "#282828", "#8ec07c" },
++    [SchemeOutHighlight] = { "#9d0006", "#8ec07c" },
 +};
 +
 +/* -l option; if nonzero, dmenu uses vertical list with given number of lines */
@@ -320,7 +320,7 @@ index ed0e442..798bd32 100644
  embed into windowid.
  .SH USAGE
 diff --git a/dmenu.c b/dmenu.c
-index c2425e2..07224d5 100644
+index c2425e2..7990dc7 100644
 --- a/dmenu.c
 +++ b/dmenu.c
 @@ -25,7 +25,7 @@
@@ -348,7 +348,7 @@ index c2425e2..07224d5 100644
  static void
  cleanup(void)
  {
-@@ -129,6 +138,43 @@ cistrstr(const char *h, const char *n)
+@@ -129,6 +138,55 @@ cistrstr(const char *h, const char *n)
  	return NULL;
  }
  
@@ -356,7 +356,12 @@ index c2425e2..07224d5 100644
 +drawhighlights(struct item *item, int x, int y, int maxw)
 +{
 +	char restorechar, tokens[sizeof text], *highlight,  *token;
-+	int indentx, highlightlen;
++	int indentx, highlightlen, highlightw, textw, ellipsisw, truncated;
++
++	/* width for the item text, and whether drw_text() cuts it with an ellipsis */
++	textw = maxw - lrpad / 2;
++	ellipsisw = TEXTW("...") - lrpad;
++	truncated = (int)TEXTW(item->text) - lrpad > textw;
 +
 +	drw_setscheme(drw, scheme[item == sel ? SchemeSelHighlight : item->out ? SchemeOutHighlight : SchemeNormHighlight]);
 +	strcpy(tokens, text);
@@ -367,21 +372,28 @@ index c2425e2..07224d5 100644
 +			highlightlen = highlight - item->text;
 +			restorechar = *highlight;
 +			item->text[highlightlen] = '\0';
-+			indentx = TEXTW(item->text);
++			indentx = TEXTW(item->text) - lrpad;
 +			item->text[highlightlen] = restorechar;
 +
-+			// Move highlight str end, draw highlight, & restore
++			// Hidden under the ellipsis, and so is every later match
++			if (truncated && indentx + ellipsisw > textw) break;
++
++			// Move highlight str end, calc width & restore
 +			restorechar = highlight[strlen(token)];
 +			highlight[strlen(token)] = '\0';
-+			if (indentx < maxw)
-+				drw_text(
-+					drw,
-+					x + indentx - (lrpad / 2) - 1,
-+					y,
-+					MIN(maxw - indentx, TEXTW(highlight) - lrpad),
-+					bh, 0, highlight, 0
-+				);
++			highlightw = TEXTW(highlight) - lrpad;
 +			highlight[strlen(token)] = restorechar;
++
++			if (truncated && indentx + highlightw > textw - ellipsisw) {
++				// Runs into the ellipsis: draw the rest of the item text with the
++				// same right edge, so it gets cut exactly like in drawitem()
++				drw_text(drw, x + lrpad / 2 + indentx, y, textw - indentx, bh, 0, highlight, 0);
++			} else {
++				// Move highlight str end, draw highlight, & restore
++				highlight[strlen(token)] = '\0';
++				drw_text(drw, x + lrpad / 2 + indentx, y, highlightw, bh, 0, highlight, 0);
++				highlight[strlen(token)] = restorechar;
++			}
 +
 +			if (strlen(highlight) - strlen(token) < strlen(token)) break;
 +			highlight = fstrstr(highlight + strlen(token), token);
@@ -392,7 +404,7 @@ index c2425e2..07224d5 100644
  static int
  drawitem(struct item *item, int x, int y, int w)
  {
-@@ -139,7 +185,9 @@ drawitem(struct item *item, int x, int y, int w)
+@@ -139,7 +197,9 @@ drawitem(struct item *item, int x, int y, int w)
  	else
  		drw_setscheme(drw, scheme[SchemeNorm]);
  
@@ -403,7 +415,7 @@ index c2425e2..07224d5 100644
  }
  
  static void
-@@ -613,7 +661,7 @@ run(void)
+@@ -613,7 +673,7 @@ run(void)
  static void
  setup(void)
  {
@@ -412,7 +424,7 @@ index c2425e2..07224d5 100644
  	unsigned int du;
  	XSetWindowAttributes swa;
  	XIM xim;
-@@ -626,6 +674,10 @@ setup(void)
+@@ -626,6 +686,10 @@ setup(void)
  	int a, di, n, area = 0;
  #endif
  	/* init appearance */
@@ -423,7 +435,7 @@ index c2425e2..07224d5 100644
  	for (j = 0; j < SchemeLast; j++)
  		scheme[j] = drw_scm_create(drw, colors[j], 2);
  
-@@ -636,6 +688,8 @@ setup(void)
+@@ -636,6 +700,8 @@ setup(void)
  	bh = drw->fonts->h + 2;
  	lines = MAX(lines, 0);
  	mh = (lines + 1) * bh;
@@ -432,7 +444,7 @@ index c2425e2..07224d5 100644
  #ifdef XINERAMA
  	i = 0;
  	if (parentwin == root && (info = XineramaQueryScreens(dpy, &n))) {
-@@ -667,9 +721,16 @@ setup(void)
+@@ -667,9 +733,16 @@ setup(void)
  		if (i >= n)
  			i = 0;
  
@@ -452,7 +464,7 @@ index c2425e2..07224d5 100644
  		XFree(info);
  	} else
  #endif
-@@ -677,11 +738,17 @@ setup(void)
+@@ -677,11 +750,17 @@ setup(void)
  		if (!XGetWindowAttributes(dpy, parentwin, &wa))
  			die("could not get embedding window attributes: 0x%lx",
  			    parentwin);
@@ -474,7 +486,7 @@ index c2425e2..07224d5 100644
  	inputw = mw / 3; /* input width: ~33% of monitor width */
  	match();
  
-@@ -689,9 +756,11 @@ setup(void)
+@@ -689,9 +768,11 @@ setup(void)
  	swa.override_redirect = True;
  	swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
  	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask;
@@ -487,7 +499,7 @@ index c2425e2..07224d5 100644
  	XSetClassHint(dpy, win, &ch);
  
  	/* input methods */
-@@ -719,8 +788,9 @@ setup(void)
+@@ -719,8 +800,9 @@ setup(void)
  static void
  usage(void)
  {
@@ -499,7 +511,7 @@ index c2425e2..07224d5 100644
  }
  
  int
-@@ -734,10 +804,13 @@ main(int argc, char *argv[])
+@@ -734,10 +816,13 @@ main(int argc, char *argv[])
  		if (!strcmp(argv[i], "-v")) {      /* prints version information */
  			puts("dmenu-"VERSION);
  			exit(0);
@@ -515,7 +527,7 @@ index c2425e2..07224d5 100644
  		else if (!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
  			fstrncmp = strncasecmp;
  			fstrstr = cistrstr;
-@@ -766,6 +839,8 @@ main(int argc, char *argv[])
+@@ -766,6 +851,8 @@ main(int argc, char *argv[])
  			colors[SchemeOut][ColFg] = argv[++i];
  		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
  			embed = argv[++i];
