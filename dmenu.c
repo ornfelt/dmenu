@@ -159,7 +159,7 @@ drawhighlights(struct item *item, int x, int y, int maxw)
 			// Move highlight str end, draw highlight, & restore
 			restorechar = highlight[strlen(token)];
 			highlight[strlen(token)] = '\0';
-			if (indentx - (lrpad / 2) - 1 < maxw)
+			if (indentx < maxw)
 				drw_text(
 					drw,
 					x + indentx - (lrpad / 2) - 1,
