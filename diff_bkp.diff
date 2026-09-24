@@ -1,6 +1,6 @@
 diff --git a/.claude/skills/dmenu-upstream-sync/SKILL.md b/.claude/skills/dmenu-upstream-sync/SKILL.md
 new file mode 100644
-index 0000000..e9a8697
+index 0000000..6bf29a7
 --- /dev/null
 +++ b/.claude/skills/dmenu-upstream-sync/SKILL.md
 @@ -0,0 +1,125 @@
@@ -29,7 +29,7 @@ index 0000000..e9a8697
 +cd ~/.config/dmenu
 +git remote get-url upstream 2>/dev/null || git remote add upstream https://git.suckless.org/dmenu
 +git fetch upstream
-+git status --short   # must be clean before starting - otherwise stop and ask
++git status --short -- . ':(exclude).claude'   # must be clean before starting (.claude/ itself is ignored) - otherwise stop and ask
 +```
 +
 +## 2. Find where to start
