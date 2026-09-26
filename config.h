@@ -33,6 +33,9 @@ static const char *colors[SchemeLast][2] = {
 
 /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
 static unsigned int lines      = 0;
+/* -O option; 1: list the matches in the order of stdin, like rofi; 0: exact
+ * matches first, then prefix matches, then the rest */
+static int input_order = 1;
 /* 1: the vertical list keeps its -l lines when there are fewer items, like
  * rofi; 0: it shrinks to them */
 static const int fixed_lines = 1;

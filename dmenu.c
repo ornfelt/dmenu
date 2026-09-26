@@ -425,8 +425,9 @@ match(void)
 				break;
 		if (i != tokc) /* not all tokens match */
 			continue;
-		/* exact matches go first, then prefixes, then substrings */
-		if (!tokc || !fstrncmp(text, item->text, textsize))
+		/* exact matches go first, then prefixes, then substrings; with
+		 * input_order all in the order of stdin, like rofi */
+		if (input_order || !tokc || !fstrncmp(text, item->text, textsize))
 			appenditem(item, &matches, &matchend);
 		else if (!fstrncmp(tokv[0], item->text, len))
 			appenditem(item, &lprefix, &prefixend);
@@ -1107,7 +1108,7 @@ parsesep(const char *s)
 static void
 usage(void)
 {
-	die("usage: dmenu [-bcfiv] [-ix] [-l lines] [-g columns] [-eh lines] [-p prompt]\n"
+	die("usage: dmenu [-bcfiOv] [-ix] [-l lines] [-g columns] [-eh lines] [-p prompt]\n"
 	    "             [-fn font] [-m monitor] [-n index] [-sep char] [-W width]\n"
 	    "             [-nb color] [-nf color] [-sb color] [-sf color]\n"
 	    "             [-ob color] [-of color] [-bw width] [-w windowid]");
@@ -1136,6 +1137,8 @@ main(int argc, char *argv[])
 			fstrstr = cistrstr;
 		} else if (!strcmp(argv[i], "-ix")) /* prints the index of the selected item */
 			printindex = 1;
+		else if (!strcmp(argv[i], "-O"))   /* lists the matches in input order */
+			input_order = 1;
 		else if (i + 1 == argc)
 			usage();
 		/* these options take one argument */

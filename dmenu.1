@@ -3,7 +3,7 @@
 dmenu \- dynamic menu
 .SH SYNOPSIS
 .B dmenu
-.RB [ \-bcfiv ]
+.RB [ \-bcfiOv ]
 .RB [ \-ix ]
 .RB [ \-l
 .IR lines ]
@@ -66,6 +66,11 @@ is faster, but will lock up X until stdin reaches end\-of\-file.
 .TP
 .B \-i
 dmenu matches menu items case insensitively.
+.TP
+.B \-O
+dmenu lists the matching items in the order they came on stdin, instead of
+exact matches first, then prefix matches, then the rest (input_order in
+config.h).
 .TP
 .BI \-l " lines"
 dmenu lists items vertically, with the given number of lines (also when there
