@@ -4,8 +4,19 @@ dmenu \- dynamic menu
 .SH SYNOPSIS
 .B dmenu
 .RB [ \-bcfiv ]
+.RB [ \-ix ]
 .RB [ \-l
 .IR lines ]
+.RB [ \-g
+.IR columns ]
+.RB [ \-eh
+.IR lines ]
+.RB [ \-n
+.IR index ]
+.RB [ \-sep
+.IR char ]
+.RB [ \-W
+.IR width ]
 .RB [ \-m
 .IR monitor ]
 .RB [ \-p
@@ -59,6 +70,37 @@ dmenu matches menu items case insensitively.
 .BI \-l " lines"
 dmenu lists items vertically, with the given number of lines.
 .TP
+.BI \-g " columns"
+dmenu lists items in a grid of the given number of columns and
+.B \-l
+lines, filled column by column. Left and right select the item in the
+neighbouring column.
+.TP
+.BI \-eh " lines"
+each item of the vertical list is the given number of lines high and shows
+that many lines of its text (see
+.BR \-sep ).
+.TP
+.BI \-sep " char"
+items on stdin are separated by
+.I char
+instead of a newline, so an item can have several lines.
+.IR \e0 ,
+.I \en
+and
+.I \et
+are a NUL byte, a newline and a tab.
+.TP
+.B \-ix
+dmenu prints the index of the selected item (0 is the first item on stdin)
+instead of its text, and \-1 for the input text.
+.TP
+.BI \-n " index"
+selects the item with the given index at start.
+.TP
+.BI \-W " width"
+the width of the window in pixels, when centered.
+.TP
 .BI \-m " monitor"
 dmenu is displayed on the monitor number supplied. Monitor numbers are starting
 from 0.
@@ -94,8 +136,8 @@ defines the outline foreground color (for multiple selection).
 prints version information to stdout, then exits.
 .TP
 .BI \-bw " width"
-sets the width of the window border in pixels. The border uses the selected
-background color.
+sets the width of the window border in pixels. The border and the line
+between the input and the list use the SchemeBorder color of config.h.
 .TP
 .BI \-w " windowid"
 embed into windowid.
