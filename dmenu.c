@@ -464,6 +464,17 @@ movewordedge(int dir)
 	}
 }
 
+/* item, or the input text when item is NULL: its index with -ix (-1 for
+ * the text) */
+static void
+printitem(struct item *item)
+{
+	if (printindex)
+		printf("%d\n", item ? (int)(item - items) : -1);
+	else
+		puts(item ? item->text : text);
+}
+
 static void
 keypress(XKeyEvent *ev)
 {
@@ -482,6 +493,24 @@ keypress(XKeyEvent *ev)
 	case XLookupKeySym:
 	case XLookupBoth: /* a KeySym and a string are returned: use keysym */
 		break;
+	}
+
+	if (ev->state & Mod4Mask) {
+		/* super-1..9: accept the nth item shown, like rofi's kb-select-n */
+		if (ksym >= XK_1 && ksym <= XK_9) {
+			for (i = ksym - XK_1, it = curr; it && it != next && i > 0; i--)
+				it = it->right;
+			if (!it || it == next)
+				return;
+			printitem(it);
+			cleanup();
+			exit(0);
+		}
+		if (ksym == supercancelkey) {
+			cleanup();
+			exit(1);
+		}
+		return; /* other super keys don't type */
 	}
 
 	if (ev->state & ControlMask) {
@@ -647,10 +676,7 @@ insert:
 		break;
 	case XK_Return:
 	case XK_KP_Enter:
-		if (printindex)
-			printf("%d\n", (sel && !(ev->state & ShiftMask)) ? (int)(sel - items) : -1);
-		else
-			puts((sel && !(ev->state & ShiftMask)) ? sel->text : text);
+		printitem((sel && !(ev->state & ShiftMask)) ? sel : NULL);
 		if (!(ev->state & ControlMask)) {
 			cleanup();
 			exit(0);

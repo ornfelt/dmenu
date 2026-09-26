@@ -48,3 +48,7 @@ static const char worddelimiters[] = " ";
 static unsigned int border_width = 2;
 /* space around and between the input and the items, and the thickness of the line between them (rofi's 2px) */
 static int padding = 2;
+
+/* super + this key cancels like Escape: my WMs open the layout menu with
+ * mod-r, so it closes it again (rofi's -kb-cancel in layout_menu.sh) */
+static const KeySym supercancelkey = XK_r;
