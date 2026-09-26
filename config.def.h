@@ -29,6 +29,9 @@ static const char *colors[SchemeLast][2] = {
 };
 /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
 static unsigned int lines      = 0;
+/* 1: the vertical list keeps its -l lines when there are fewer items, like
+ * rofi; 0: it shrinks to them */
+static const int fixed_lines = 0;
 /* -g option; columns of the vertical list, a grid filled column by column */
 static unsigned int columns    = 1;
 /* -eh option; lines of text per item (an item's own lines, read with -sep) */
@@ -48,3 +51,6 @@ static int padding = 0;
 /* super + this key cancels like Escape: my WMs open the layout menu with
  * mod-r, so it closes it again (rofi's -kb-cancel in layout_menu.sh) */
 static const KeySym supercancelkey = XK_r;
+
+/* two clicks on an item within this many milliseconds accept it */
+static const unsigned int doubleclick_ms = 300;

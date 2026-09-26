@@ -118,6 +118,7 @@ cleanup(void)
 	size_t i;
 
 	XUngrabKeyboard(dpy, CurrentTime);
+	XUngrabPointer(dpy, CurrentTime);
 	for (i = 0; i < SchemeLast; i++)
 		drw_scm_free(drw, scheme[i], 2);
 	drw_fontset_free(hlfonts);
@@ -276,12 +277,22 @@ drawitem(struct item *item, int x, int y, int w, int h, int alt)
 	return x + w;
 }
 
+/* the box of the ith item shown in the vertical list: columns of lines
+ * items under the input and the line below it */
+static void
+itembox(int i, int *x, int *y, int *w)
+{
+	*w = (mw - 2 * padding - (columns - 1) * padding) / columns;
+	*x = padding + i / lines * (*w + padding);
+	*y = 3 * padding + inputh + i % lines * (itemh + padding);
+}
+
 static void
 drawmenu(void)
 {
 	unsigned int curpos;
 	struct item *item;
-	int x = padding, y = padding, w, i, n, cw;
+	int x = padding, y = padding, w, i, n;
 
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, 0, 0, mw, mh, 1, 1);
@@ -306,15 +317,14 @@ drawmenu(void)
 		y += inputh;
 		drw_setscheme(drw, scheme[SchemeBorder]);
 		drw_rect(drw, padding, y, mw - 2 * padding, padding, 1, 0);
-		y += 2 * padding;
 		/* draw vertical list: columns of lines items (a grid with -g),
 		 * filled column by column */
-		cw = (mw - 2 * padding - (columns - 1) * padding) / columns;
 		for (n = 0, item = matches; item && item != curr; item = item->right)
 			n++;
-		for (i = 0, item = curr; item != next; item = item->right, i++)
-			drawitem(item, padding + i / lines * (cw + padding),
-			         y + i % lines * (itemh + padding), cw, itemh, (n + i) % 2);
+		for (i = 0, item = curr; item != next; item = item->right, i++) {
+			itembox(i, &x, &y, &w);
+			drawitem(item, x, y, w, itemh, (n + i) % 2);
+		}
 	} else if (matches && curr) {
 		/* draw horizontal list */
 		x += inputw;
@@ -368,6 +378,25 @@ grabkeyboard(void)
 		nanosleep(&ts, NULL);
 	}
 	die("cannot grab keyboard");
+}
+
+/* grab the pointer so a click outside the window reaches it too (rofi's
+ * click-to-exit); without the grab dmenu only misses that */
+static void
+grabpointer(void)
+{
+	struct timespec ts = { .tv_sec = 0, .tv_nsec = 1000000  };
+	int i;
+
+	if (embed)
+		return;
+	/* e.g. the WM still holds the click that started dmenu */
+	for (i = 0; i < 1000; i++) {
+		if (XGrabPointer(dpy, win, True, ButtonPressMask, GrabModeAsync,
+		                 GrabModeAsync, None, None, CurrentTime) == GrabSuccess)
+			return;
+		nanosleep(&ts, NULL);
+	}
 }
 
 static void
@@ -753,6 +782,66 @@ draw:
 	drawmenu();
 }
 
+/* the mouse, like rofi: a click selects an item and a double click
+ * accepts it, the wheel moves the selection and a click outside the window
+ * exits */
+static void
+buttonpress(XButtonEvent *ev)
+{
+	static Time lasttime;
+	struct item *item;
+	int x, y, w, i, bw = border_width;
+
+	if (ev->x < -bw || ev->y < -bw || ev->x >= mw + bw || ev->y >= mh + bw) {
+		if (ev->button == Button4 || ev->button == Button5)
+			return; /* scrolling elsewhere */
+		cleanup();
+		exit(1);
+	}
+	switch (ev->button) {
+	case Button4: /* wheel: the previous item */
+		if (sel && sel->left && (sel = sel->left)->right == curr) {
+			curr = prev;
+			calcoffsets();
+		}
+		break;
+	case Button5: /* wheel: the next item */
+		if (sel && sel->right && (sel = sel->right) == next) {
+			curr = next;
+			calcoffsets();
+		}
+		break;
+	case Button1:
+		/* the item under the pointer */
+		x = padding + promptw + inputw + TEXTW("<");
+		for (i = 0, item = curr; item != next; item = item->right, i++) {
+			if (lines > 0) {
+				itembox(i, &x, &y, &w);
+				if (ev->x >= x && ev->x < x + w && ev->y >= y && ev->y < y + itemh)
+					break;
+			} else {
+				w = textw_clamp(item->text, mw - padding - x - TEXTW(">"));
+				if (ev->x >= x && ev->x < x + w)
+					break;
+				x += w;
+			}
+		}
+		if (item == next)
+			return;
+		if (item == sel && ev->time - lasttime < doubleclick_ms) {
+			printitem(item);
+			cleanup();
+			exit(0);
+		}
+		sel = item;
+		lasttime = ev->time;
+		break;
+	default:
+		return;
+	}
+	drawmenu();
+}
+
 static void
 paste(void)
 {
@@ -798,7 +887,8 @@ readstdin(void)
 	free(line);
 	if (items)
 		items[i].text = NULL;
-	lines = MIN(lines, i);
+	if (!fixed_lines)
+		lines = MIN(lines, i);
 }
 
 static void
@@ -826,6 +916,9 @@ run(void)
 			break;
 		case KeyPress:
 			keypress(&ev.xkey);
+			break;
+		case ButtonPress:
+			buttonpress(&ev.xbutton);
 			break;
 		case SelectionNotify:
 			if (ev.xselection.property == utf8)
@@ -966,7 +1059,7 @@ setup(void)
 	/* create menu window */
 	swa.override_redirect = True;
 	swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
-	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask;
+	swa.event_mask = ExposureMask | KeyPressMask | ButtonPressMask | VisibilityChangeMask;
 	win = XCreateWindow(dpy, root, x, y, mw, mh, border_width,
 	                    CopyFromParent, CopyFromParent, CopyFromParent,
 	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
@@ -982,6 +1075,7 @@ setup(void)
 	                XNClientWindow, win, XNFocusWindow, win, NULL);
 
 	XMapRaised(dpy, win);
+	grabpointer();
 	if (embed) {
 		XReparentWindow(dpy, win, parentwin, x, y);
 		XSelectInput(dpy, parentwin, FocusChangeMask | SubstructureNotifyMask);

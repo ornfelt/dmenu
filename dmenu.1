@@ -68,7 +68,8 @@ is faster, but will lock up X until stdin reaches end\-of\-file.
 dmenu matches menu items case insensitively.
 .TP
 .BI \-l " lines"
-dmenu lists items vertically, with the given number of lines.
+dmenu lists items vertically, with the given number of lines (also when there
+are fewer items, with fixed_lines in config.h).
 .TP
 .BI \-g " columns"
 dmenu lists items in a grid of the given number of columns and
@@ -142,8 +143,10 @@ between the input and the list use the SchemeBorder color of config.h.
 .BI \-w " windowid"
 embed into windowid.
 .SH USAGE
-dmenu is completely controlled by the keyboard.  Items are selected using the
-arrow keys, page up, page down, home, and end.
+Items are selected using the arrow keys, page up, page down, home, and end,
+or the mouse: a click selects an item, a double click confirms it, the wheel
+selects the previous or next item and a click outside dmenu exits, returning
+failure.
 .TP
 .B Tab
 Select the next item, wrapping around to the first.
